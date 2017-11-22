@@ -57,7 +57,7 @@ executable wheelOfFortune
   -- other-extensions:    
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.10 && <4.11, gloss==1.11.1.1
+  build-depends:       base >=4.10 && <4.11, gloss==1.11.1.1, random==1.1
   
   -- Directories containing source files.
   -- hs-source-dirs:      
