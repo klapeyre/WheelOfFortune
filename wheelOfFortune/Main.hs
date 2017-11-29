@@ -39,7 +39,7 @@ module Main(main) where
         , currWheel = 25
         , guessedLetters = []
         , wheelBMP = translate 400 0 $ scale 0.3 0.3 $ image
-        , ranGen = mkStdGen 1
+        , ranGen = mkStdGen 2
         }
 
     fps :: Int
@@ -761,15 +761,26 @@ module Main(main) where
 
     handleKeys (EventKey (SpecialKey KeySpace) Down _ _) game =
         game {currWheel = newNum
-            , ranGen = updatedGen}
+            , ranGen = updatedGen
+            , player1 = new1
+            , player2 = new2
+            , playerturn = nextPlayer}
         where
             wheelList = wheel game
             myGen = ranGen game
             -- insert random generator here
             (num, g) = genNumber myGen game
             newNum = wheelList !! num
-    --        handleBankrupt game newNum
-    --        handleLoseATurn game newNum
+            isBankrupt = newNum == 0
+            isLoseTurn = newNum == 1
+            currPlayer = playerturn game
+            curr1 = player1 game
+            curr2 = player2 game
+            -- Player spins bankrupt
+            new1 = if isBankrupt && currPlayer == 1 then 0 else curr1
+            new2 = if isBankrupt && currPlayer == 2 then 0 else curr2
+            -- Player spins LoseTurn
+            nextPlayer = if isLoseTurn || isBankrupt then 1 - currPlayer + 2 else currPlayer
 
             updatedGen = g
     
