@@ -24,13 +24,14 @@ module Main(main) where
         , wheel :: [Int]
         , currWheel :: Int
         , guessedLetters :: [Char]
-        , wheelBMP :: Picture       
+        , wheelBMP :: Picture
+        , ranGen :: StdGen       
         } deriving Show
     
     initialState :: Picture -> WheelGame
     initialState image = Game 
-        { player1 = 100
-        , player2 = 500
+        { player1 = 0
+        , player2 = 0
         , solution = "OURGAMEISTHEBEST"
         , puzzle = puzzle2
         , playerturn = 1
@@ -38,6 +39,7 @@ module Main(main) where
         , currWheel = 25
         , guessedLetters = []
         , wheelBMP = translate 400 0 $ scale 0.3 0.3 $ image
+        , ranGen = mkStdGen 1
         }
 
     fps :: Int
@@ -121,11 +123,12 @@ module Main(main) where
             newLetter = ((tx,ty),(bx,by),black,x)
     
     handleKeys :: Event -> WheelGame -> WheelGame
-    handleKeys (EventKey (Char 'a') _ _ _) game =
+    handleKeys (EventKey (Char 'a') Down _ _) game =
         game { puzzle = letterA'
              , player1 = new1
              , player2 = new2
-             , guessedLetters = newGuess}
+             , guessedLetters = newGuess
+             , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -142,12 +145,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "A"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'b') _ _ _) game =
+    handleKeys (EventKey (Char 'b') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -164,12 +169,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "B"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'c') _ _ _) game =
+    handleKeys (EventKey (Char 'c') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -186,12 +193,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "C"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
                     
-    handleKeys (EventKey (Char 'd') _ _ _) game =
+    handleKeys (EventKey (Char 'd') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -208,12 +217,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "D"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'e') _ _ _) game =
+    handleKeys (EventKey (Char 'e') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -230,12 +241,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "E"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'f') _ _ _) game =
+    handleKeys (EventKey (Char 'f') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -252,12 +265,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "F"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'g') _ _ _) game =
+    handleKeys (EventKey (Char 'g') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -274,12 +289,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "G"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'h') _ _ _) game =
+    handleKeys (EventKey (Char 'h') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -296,12 +313,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "H"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'i') _ _ _) game =
+    handleKeys (EventKey (Char 'i') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -318,12 +337,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "I"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
                     
-    handleKeys (EventKey (Char 'j') _ _ _) game =
+    handleKeys (EventKey (Char 'j') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -340,12 +361,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "J"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
     handleKeys (EventKey (Char 'k') _ _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -362,12 +385,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "K"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'l') _ _ _) game =
+    handleKeys (EventKey (Char 'l') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -384,12 +409,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "L"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
 
-    handleKeys (EventKey (Char 'm') _ _ _) game =
+    handleKeys (EventKey (Char 'm') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -406,12 +433,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "M"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'n') _ _ _) game =
+    handleKeys (EventKey (Char 'n') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -428,12 +457,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "N"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'o') _ _ _) game =
+    handleKeys (EventKey (Char 'o') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -450,12 +481,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "O"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
                     
-    handleKeys (EventKey (Char 'p') _ _ _) game =
+    handleKeys (EventKey (Char 'p') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -472,12 +505,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "P"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'q') _ _ _) game =
+    handleKeys (EventKey (Char 'q') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -494,12 +529,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "Q"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'r') _ _ _) game =
+    handleKeys (EventKey (Char 'r') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -516,12 +553,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "R"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 's') _ _ _) game =
+    handleKeys (EventKey (Char 's') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -538,12 +577,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "S"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 't') _ _ _) game =
+    handleKeys (EventKey (Char 't') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -560,12 +601,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "T"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'u') _ _ _) game =
+    handleKeys (EventKey (Char 'u') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -582,12 +625,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "U"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
                     
-    handleKeys (EventKey (Char 'v') _ _ _) game =
+    handleKeys (EventKey (Char 'v') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -604,12 +649,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "V"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'w') _ _ _) game =
+    handleKeys (EventKey (Char 'w') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -626,12 +673,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "W"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'x') _ _ _) game =
+    handleKeys (EventKey (Char 'x') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -648,12 +697,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "X"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'y') _ _ _) game =
+    handleKeys (EventKey (Char 'y') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -670,12 +721,14 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "Y"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
     
-    handleKeys (EventKey (Char 'z') _ _ _) game =
+    handleKeys (EventKey (Char 'z') Down _ _) game =
         game { puzzle = letterA'
                 , player1 = new1
                 , player2 = new2
-                , guessedLetters = newGuess}
+                , guessedLetters = newGuess
+                , playerturn = nextPlayer}
         where
             letterPic = puzzle game
             sol = solution game
@@ -692,6 +745,7 @@ module Main(main) where
             new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
             newGuess = if check then guesses else guesses ++ "Z"
             letterA' = revealLetters letterPic posOfLetter
+            nextPlayer = if numFound == 0 then 1 - p + 2 else p
 
     handleKeys (EventKey (Char '1') _ _ _) game =
         game { playerturn = 1}
@@ -699,16 +753,28 @@ module Main(main) where
     handleKeys (EventKey (Char '2') _ _ _) game = 
         game { playerturn = 2}
 
-    handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game =
-        game {currWheel = newNum}
+    handleKeys (EventKey (SpecialKey KeySpace) Down _ _) game =
+        game {currWheel = newNum
+            , ranGen = updatedGen}
         where
             wheelList = wheel game
+            myGen = ranGen game
             -- insert random generator here
-            newNum = 500
-            
-            
+            (num, g) = genNumber myGen game
+            newNum = wheelList !! num
+    --        handleBankrupt game newNum
+    --        handleLoseATurn game newNum
+
+            updatedGen = g
     
     handleKeys _ game = game    
+
+    genNumber :: StdGen -> WheelGame -> (Int, StdGen)
+    genNumber sGen game = randomR (0,23) r
+            where
+                r = ranGen game
+    
+    --handleBankrupt :: WheelGame -> Int -> 
 
     puzzle1 = [(((-480),(-50)),((-440),0),white,"A"),
                (((-370),(-50)),((-330),0),white,"B"),
