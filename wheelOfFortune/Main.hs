@@ -35,7 +35,7 @@ module Main(main) where
         , solution = "OURGAMEISTHEBEST"
         , puzzle = puzzle2
         , playerturn = 1
-        , wheel = [0,500,25,450,100,325,1,150,250,375,50,425,0,75,475,175,400,200,2,275,350,225,300,125]
+        , wheel = [0,500,25,450,100,325,1,150,250,375,50,425,0,75,475,175,400,200,1000,275,350,225,300,125]
         , currWheel = 25
         , guessedLetters = []
         , wheelBMP = translate 400 0 $ scale 0.3 0.3 $ image
@@ -64,9 +64,15 @@ module Main(main) where
             renderedPuzzle = pictures finalPuzzle
             
     renderWheelVal :: Int -> Picture
-    renderWheelVal w = translate 200 (-250) $ scale 0.5 0.5 $ text ("Spin: $" ++ wText)
-            where 
+    renderWheelVal w = translate 200 (-250) $ scale 0.5 0.5 $ text spinText
+            where
                 wText = show w
+                spinText = if (w == 0 || w == 1) then displayBadSpin w else ("Spin:$" ++ wText)
+    
+    displayBadSpin :: Int -> [Char]
+    displayBadSpin w = text
+                where
+                    text = if (w == 1) then "Lose Turn!" else "Bankrupt!"
 
     renderPlayers :: Int -> Int -> Int -> [Picture]
     renderPlayers p1 p2 p = [pDisplay1,pDisplay2]
