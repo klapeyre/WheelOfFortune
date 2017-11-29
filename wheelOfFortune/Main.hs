@@ -17,15 +17,27 @@ module Main(main) where
 
     data WheelGame = Game 
         { player1 :: Int
+        , player2 :: Int
         , solution :: [Char]
-        , puzzle :: [((Float,Float),(Float,Float),Color,[Char])]        
+        , puzzle :: [((Float,Float),(Float,Float),Color,[Char])]
+        , playerturn :: Int
+        , wheel :: [Int]
+        , currWheel :: Int
+        , guessedLetters :: [Char]
+        , wheelBMP :: Picture       
         } deriving Show
     
-    initialState :: WheelGame
-    initialState = Game 
-        { player1 = 0
+    initialState :: Picture -> WheelGame
+    initialState image = Game 
+        { player1 = 100
+        , player2 = 500
         , solution = "OURGAMEISTHEBEST"
         , puzzle = puzzle2
+        , playerturn = 1
+        , wheel = [0,500,25,450,100,325,1,150,250,375,50,425,0,75,475,175,400,200,2,275,350,225,300,125]
+        , currWheel = 25
+        , guessedLetters = []
+        , wheelBMP = translate 400 0 $ scale 0.3 0.3 $ image
         }
 
     fps :: Int
@@ -39,9 +51,33 @@ module Main(main) where
             complexPuzzle = [renderOne x | x <- puzzleW]
             -- Flatten lists
             flattenedPuzzle = concat complexPuzzle
-            renderedPuzzle = pictures flattenedPuzzle
+            player = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            players = renderPlayers p1 p2 player
+            w = currWheel game
+            wheelVal = renderWheelVal w
+            wheelImage = wheelBMP game
+            finalPuzzle = flattenedPuzzle ++ players ++ [wheelVal] ++ [wheelImage]
+            renderedPuzzle = pictures finalPuzzle
             
-    
+    renderWheelVal :: Int -> Picture
+    renderWheelVal w = translate 200 (-250) $ scale 0.5 0.5 $ text ("Spin: $" ++ wText)
+            where 
+                wText = show w
+
+    renderPlayers :: Int -> Int -> Int -> [Picture]
+    renderPlayers p1 p2 p = [pDisplay1,pDisplay2]
+            where
+                p1text = show p1
+                p2text = show p2
+                pDisplay1 = if (p == 1) 
+                    then translate (-580) (-250) $ scale 0.5 0.5 $ Color red $ text ("P1:$" ++ p1text)
+                    else translate (-580) (-250) $ scale 0.5 0.5 $ text ("P1:$" ++ p1text)
+                pDisplay2 = if (p == 2)
+                    then translate (-200) (-250) $ scale 0.5 0.5 $ Color red $ text ("P2:$" ++ p2text)
+                    else translate (-200) (-250) $ scale 0.5 0.5 $ text ("P2:$" ++ p2text)
+                
     renderOne :: ((Float,Float),(Float,Float),Color,[Char]) -> [Picture]
     renderOne nums = blockAndText
             where
@@ -51,7 +87,9 @@ module Main(main) where
                 blockAndText = [blockX,textX]
 
     main :: IO ()
-    main = play window background fps initialState render handleKeys update
+    main = do
+        wheelImage <- loadBMP "Untitled.bmp"
+        play window background fps (initialState wheelImage) render handleKeys update
 
     update :: Float -> WheelGame -> WheelGame
     update seconds = updateGame seconds
@@ -80,217 +118,597 @@ module Main(main) where
     adjustLetter letter = newLetter
         where
             ((tx,ty),(bx,by),c,x) = letter
-            newLetter = ((tx,ty),(bx,by),black,x)              
-
+            newLetter = ((tx,ty),(bx,by),black,x)
+    
     handleKeys :: Event -> WheelGame -> WheelGame
     handleKeys (EventKey (Char 'a') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+             , player1 = new1
+             , player2 = new2
+             , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'A' guesses
             posOfLetter = findLetters sol 'A'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "A"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'b') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'B' guesses
             posOfLetter = findLetters sol 'B'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "B"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'c') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'C' guesses
             posOfLetter = findLetters sol 'C'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "C"
             letterA' = revealLetters letterPic posOfLetter
                     
     handleKeys (EventKey (Char 'd') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'D' guesses
             posOfLetter = findLetters sol 'D'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "D"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'e') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'E' guesses
             posOfLetter = findLetters sol 'E'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "E"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'f') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'F' guesses
             posOfLetter = findLetters sol 'F'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "F"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'g') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'G' guesses
             posOfLetter = findLetters sol 'G'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "G"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'h') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'H' guesses
             posOfLetter = findLetters sol 'H'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "H"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'i') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'I' guesses
             posOfLetter = findLetters sol 'I'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "I"
             letterA' = revealLetters letterPic posOfLetter
                     
     handleKeys (EventKey (Char 'j') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'J' guesses
             posOfLetter = findLetters sol 'J'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "J"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'k') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'K' guesses
             posOfLetter = findLetters sol 'K'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "K"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'l') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'L' guesses
             posOfLetter = findLetters sol 'L'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "L"
             letterA' = revealLetters letterPic posOfLetter
 
     handleKeys (EventKey (Char 'm') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'M' guesses
             posOfLetter = findLetters sol 'M'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "M"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'n') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'N' guesses
             posOfLetter = findLetters sol 'N'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "N"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'o') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'O' guesses
             posOfLetter = findLetters sol 'O'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "O"
             letterA' = revealLetters letterPic posOfLetter
                     
     handleKeys (EventKey (Char 'p') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'P' guesses
             posOfLetter = findLetters sol 'P'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "P"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'q') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'Q' guesses
             posOfLetter = findLetters sol 'Q'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "Q"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'r') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'R' guesses
             posOfLetter = findLetters sol 'R'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "R"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 's') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'S' guesses
             posOfLetter = findLetters sol 'S'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "S"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 't') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'T' guesses
             posOfLetter = findLetters sol 'T'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "T"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'u') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'U' guesses
             posOfLetter = findLetters sol 'U'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "U"
             letterA' = revealLetters letterPic posOfLetter
                     
     handleKeys (EventKey (Char 'v') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'V' guesses
             posOfLetter = findLetters sol 'V'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "V"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'w') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'W' guesses
             posOfLetter = findLetters sol 'W'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "W"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'x') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'X' guesses
             posOfLetter = findLetters sol 'X'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "X"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'y') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'Y' guesses
             posOfLetter = findLetters sol 'Y'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "Y"
             letterA' = revealLetters letterPic posOfLetter
     
     handleKeys (EventKey (Char 'z') _ _ _) game =
-        game { puzzle = letterA'}
+        game { puzzle = letterA'
+                , player1 = new1
+                , player2 = new2
+                , guessedLetters = newGuess}
         where
             letterPic = puzzle game
             sol = solution game
+            winBaseAmount = currWheel game
+            p = playerturn game
+            p1 = player1 game
+            p2 = player2 game
+            guesses = guessedLetters game
+            check = elem 'Z' guesses
             posOfLetter = findLetters sol 'Z'
+            numFound = length posOfLetter
+            amountWon = numFound * winBaseAmount
+            new1 = if (p == 1 && (not check)) then amountWon + p1 else p1
+            new2 = if (p == 2 && (not check)) then amountWon + p2 else p2
+            newGuess = if check then guesses else guesses ++ "Z"
             letterA' = revealLetters letterPic posOfLetter
-    handleKeys _ game = game
+
+    handleKeys (EventKey (Char '1') _ _ _) game =
+        game { playerturn = 1}
+    
+    handleKeys (EventKey (Char '2') _ _ _) game = 
+        game { playerturn = 2}
+
+    handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game =
+        game {currWheel = newNum}
+        where
+            wheelList = wheel game
+            -- insert random generator here
+            newNum = 500
+            
+            
+    
+    handleKeys _ game = game    
 
     puzzle1 = [(((-480),(-50)),((-440),0),white,"A"),
                (((-370),(-50)),((-330),0),white,"B"),
@@ -314,4 +732,3 @@ module Main(main) where
                (((-360),(-90)),((-320),(-40)),white,"S"),
                (((-250),(-90)),((-210),(-40)),white,"T")]
 
-    
